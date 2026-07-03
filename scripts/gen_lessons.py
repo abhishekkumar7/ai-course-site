@@ -3,46 +3,10 @@
 Each lesson renders the six fixed blocks: Objective, Key concepts, Hands-on, Tools, Read/explore.
 File citations are rendered as `ref:` chips the professor can later wire to slides/videos/papers.
 """
-import os, html, json
+import os, html
+from _common import slug, masthead, footer
 
-ROOT = os.path.dirname(os.path.abspath(__file__))
-
-# ---- shared chrome ---------------------------------------------------------
-def masthead(rel, active):
-    items = [("Foundation",rel+"foundation/index.html","foundation"),
-             ("Research",rel+"research/index.html","research"),
-             ("Management",rel+"management/index.html","management"),
-             ("All courses",rel+"courses/index.html","courses"),
-             ("Toolkit",rel+"toolkit.html","toolkit"),
-             ("Library",rel+"library.html","library"),
-             ("About",rel+"about.html","about")]
-    links = "\n      ".join(f'<a href="{u}">{t}</a>' for t,u,a in items)
-    return f'''<header class="masthead">
-  <div class="wrap">
-    <a class="brand" href="{rel}index.html">
-      <span class="glyph">AI</span>
-      <span class="bt"><b>AI for Management &amp; Research</b><span>Open Learning · SPJIMR</span></span>
-    </a>
-    <button class="menubtn" aria-label="Menu">☰</button>
-    <nav class="nav" aria-label="Primary">
-      {links}
-      <a class="cta" href="{rel}foundation/index.html">Start free →</a>
-    </nav>
-  </div>
-</header>'''
-
-def footer(rel):
-    return f'''<footer class="foot">
-  <div class="wrap">
-    <div class="cols">
-      <div><h5>AI for Management &amp; Research</h5><p class="blurb">A free, public, hands-on curriculum teaching AI from a management and research perspective.</p></div>
-      <div><h5>Tracks</h5><a href="{rel}foundation/index.html">AI Foundation</a><a href="{rel}research/index.html">AI for Research</a><a href="{rel}management/index.html">AI for Managers</a></div>
-      <div><h5>Resources</h5><a href="{rel}toolkit.html">Free Tools Directory</a><a href="{rel}library.html">Reading Library</a><a href="{rel}courses/index.html">All courses</a></div>
-      <div><h5>About</h5><a href="{rel}about.html">The instructor</a><a href="https://www.spjimr.org/faculty/abhishek-kumar-jha/">SPJIMR profile ↗</a></div>
-    </div>
-    <div class="base"><span>© 2026 · Prof. Abhishek Kumar Jha · SPJIMR Information Management</span><span>Open learning · Free to use</span></div>
-  </div>
-</footer>'''
+ROOT = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 
 def tool_chip(t):
     name, url = t
@@ -52,15 +16,14 @@ def tool_chip(t):
 
 def lesson_page(rel, track_url, track_name, code, title, objective, concepts,
                 handson, tools, reads, refs, prev_l, next_l, siblings):
-    # siblings sidebar nav
     sib = "\n      ".join(
         f'<a href="{u}"{" style=\"color:var(--brick);font-weight:600\"" if c==code else ""}>{c} · {t}</a>'
-        for c,t,u in siblings)
+        for c, t, u in siblings)
     concept_li = "\n        ".join(f"<li>{html.escape(c)}</li>" for c in concepts)
     tool_li = "\n        ".join(tool_chip(t) for t in tools)
     read_li = "\n        ".join(
         (f'<li><a href="{html.escape(u)}">{html.escape(n)}</a></li>' if u
-         else f'<li>{html.escape(n)}</li>') for n,u in reads)
+         else f'<li>{html.escape(n)}</li>') for n, u in reads)
     ref_html = ""
     if refs:
         chips = " ".join(f'<a class="ref" href="#" onclick="return false" title="To be linked: slides, video, or paper">ref: {html.escape(r)}</a>' for r in refs)
@@ -83,7 +46,7 @@ def lesson_page(rel, track_url, track_name, code, title, objective, concepts,
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
-{masthead(rel, track_name)}
+{masthead(rel)}
 <main id="main">
 <div class="lessonhead">
   <div class="wrap">
@@ -174,15 +137,15 @@ FOUNDATION = [
   ["AI vs. ML vs. deep learning vs. generative AI — the nested relationship",
    "Supervised, unsupervised, and reinforcement learning in plain language",
    "Discriminative vs. generative models: predicting a label vs. producing content",
-   "Why \u201cAI\u201d today usually means large neural networks trained on huge data"],
+   "Why “AI” today usually means large neural networks trained on huge data"],
   "Ask ChatGPT, Claude, and Gemini the same question and compare answers; note where they agree, differ, and hedge. This is your first model comparison.",
   [T["chatgpt"],T["claude"],T["gemini"]],
   [("Elements of AI (free course)","https://www.elementsofai.com/"),("Google ML Crash Course","https://developers.google.com/machine-learning/crash-course")],
   ["F1.1 slides","F1.1 video"]),
  ("F1.2","Live AI vs. marketing hype",
-  "Separate what AI can reliably do today from vendor claims, using the Gartner Hype Cycle and the idea of a \u201cjagged frontier\u201d of capability.",
+  "Separate what AI can reliably do today from vendor claims, using the Gartner Hype Cycle and the idea of a “jagged frontier” of capability.",
   ["The Gartner Hype Cycle applied to GenAI","Capability vs. reliability: where models are superhuman and where they fail",
-   "The \u201cjagged frontier\u201d — tasks of similar difficulty, very different success","How to read a benchmark and a demo critically"],
+   "The “jagged frontier” — tasks of similar difficulty, very different success","How to read a benchmark and a demo critically"],
   "Pick three AI claims from recent ads or LinkedIn posts and test each one directly in a chatbot; classify them as real, exaggerated, or false.",
   [T["perplexity"]],
   [("Dell'Acqua et al. — Navigating the Jagged Technological Frontier","https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4573321"),("Ethan Mollick — One Useful Thing","https://www.oneusefulthing.org/")],
@@ -191,7 +154,7 @@ FOUNDATION = [
   "Give yourself a map of the field: model families, providers, modalities (text, image, audio, video, code), and open vs. closed models.",
   ["Major model families and providers (OpenAI, Anthropic, Google, Meta, Mistral, open-source)","Modalities and multimodality",
    "Open-weight vs. proprietary models — trade-offs","Where Indian and global models fit"],
-  "Build a one-page personal \u201cAI stack\u201d: list one free tool you would use for writing, search, images, and data.",
+  "Build a one-page personal “AI stack”: list one free tool you would use for writing, search, images, and data.",
   [T["hf"],T["poe"]],
   [("Stanford AI Index Report","https://aiindex.stanford.edu/report/")],
   ["F1.3 slides"]),
@@ -199,7 +162,7 @@ FOUNDATION = [
   "Explain what a large language model actually does — predict the next token — and why that simple idea produces such capable behaviour.",
   ["Tokens and tokenisation","Embeddings: turning words into vectors of meaning","Next-token prediction and probability",
    "Why the same prompt can give different answers (temperature, sampling)"],
-  "Use the OpenAI tokenizer to see how your own sentence is split into tokens; then lower/raise \u201ccreativity\u201d in a playground and observe the change.",
+  "Use the OpenAI tokenizer to see how your own sentence is split into tokens; then lower/raise “creativity” in a playground and observe the change.",
   [T["tokenizer"],T["aistudio"]],
   [("Vaswani et al. — Attention Is All You Need","https://arxiv.org/abs/1706.03762")],
   ["F2.1 slides","F2.1 video"]),
@@ -213,7 +176,7 @@ FOUNDATION = [
   ["F2.2 slides"]),
  ("F2.3","The frontier: reasoning and test-time compute",
   "Introduce reasoning models and the shift from training-time to test-time (inference-time) compute — the current frontier.",
-  ["System 1 vs. System 2 thinking applied to models (Kahneman)","Chain-of-thought and why \u201cthinking longer\u201d helps",
+  ["System 1 vs. System 2 thinking applied to models (Kahneman)","Chain-of-thought and why “thinking longer” helps",
    "Train-time scaling laws vs. test-time compute","Latency and cost vs. reasoning depth — a manager's trade-off"],
   "Run a multi-step logic puzzle on a standard model and a reasoning model; compare quality, time, and cost.",
   [T["chatgpt"],T["claude"]],
@@ -222,14 +185,14 @@ FOUNDATION = [
  ("F3.1","Prompting fundamentals",
   "Learn a repeatable prompting method so you get reliable results instead of lucky ones.",
   ["A simple framework: Task, Context, References, Evaluate, Iterate","Role, format, and constraints in a prompt",
-   "Few-shot prompting: showing examples","Giving the model a way to say \u201cI don't know\u201d"],
+   "Few-shot prompting: showing examples","Giving the model a way to say “I don't know”"],
   "Take a weak one-line prompt and improve it through five iterations, saving each version to start a personal prompt library.",
   [("Anthropic prompting tutorial","https://github.com/anthropics/prompt-eng-interactive-tutorial"),("Google Prompting Essentials","https://grow.google/prompting-essentials/")],
   [("OpenAI Prompt Engineering Guide","https://platform.openai.com/docs/guides/prompt-engineering")],
   ["F3.1 slides","F3.1 video"]),
  ("F3.2","Advanced prompting patterns",
   "Move beyond single prompts to structured techniques that improve accuracy and control.",
-  ["Chain-of-thought and step-by-step decomposition","Self-critique and \u201creflect then revise\u201d",
+  ["Chain-of-thought and step-by-step decomposition","Self-critique and “reflect then revise”",
    "Structured output (tables, JSON, templates)","Prompt chaining and reusable templates"],
   "Design a reusable prompt template for a recurring task (e.g., summarising a report into a one-pager) and test it on three inputs.",
   [T["claude"]],
@@ -237,7 +200,7 @@ FOUNDATION = [
   ["F3.2 slides"]),
  ("F3.3","Co-intelligence: being the human in the loop",
   "Frame AI as a collaborator, not an oracle, using Mollick's practical rules for working with AI.",
-  ["\u201cAlways invite AI to the table\u201d and \u201cbe the human in the loop\u201d","Treating AI as a smart but unreliable colleague",
+  ["“Always invite AI to the table” and “be the human in the loop”","Treating AI as a smart but unreliable colleague",
    "When to trust, when to verify, when to refuse","Augmentation vs. automation of a task"],
   "Pick one task from your week; redesign it as a human-AI workflow, deciding what AI drafts and what you must check.",
   [T["chatgpt"],T["claude"]],
@@ -263,7 +226,7 @@ FOUNDATION = [
   "Introduce tool use and multi-agent coordination — how several specialised agents collaborate.",
   ["Tool/function calling and JSON schemas","Multi-agent patterns: centralized, decentralized, hierarchical",
    "Frameworks: LangGraph, CrewAI, AutoGen (overview only)","Emerging protocols: MCP and Agent-to-Agent (A2A)"],
-  "Sketch (on paper or in a chatbot) a \u201ccommittee\u201d of 3 agents for a task you know well — who does what, and who checks whom.",
+  "Sketch (on paper or in a chatbot) a “committee” of 3 agents for a task you know well — who does what, and who checks whom.",
   [T["langgraph"],T["crewai"]],
   [("Model Context Protocol (MCP)","https://modelcontextprotocol.io/")],
   ["F4.3 slides"]),
@@ -279,7 +242,7 @@ FOUNDATION = [
   "Map the governance landscape: data privacy, IP, and the major regulatory frameworks.",
   ["What not to paste into a public chatbot (data leakage)","Copyright, IP, and provenance of AI output",
    "Global frameworks: EU AI Act; India's DPDP Act and emerging guidance","Building an organisational responsible-AI policy"],
-  "Draft a one-page \u201csafe use\u201d checklist for your team covering data, disclosure, and verification.",
+  "Draft a one-page “safe use” checklist for your team covering data, disclosure, and verification.",
   [T["euact"]],
   [("OECD AI Principles","https://oecd.ai/en/ai-principles")],
   ["F5.2 slides"]),
@@ -338,7 +301,7 @@ RESEARCH = [
   "Use AI to pressure-test design choices: sampling, measures, identification, and threats to validity.",
   ["Mapping questions to designs (experimental, survey, qualitative, mixed)","Anticipating threats to internal and external validity",
    "Power, measurement, and operationalisation as a dialogue","Pre-registration thinking"],
-  "Ask the model to critique your draft design as \u201cReviewer 2\u201d; convert its best three points into design changes.",
+  "Ask the model to critique your draft design as “Reviewer 2”; convert its best three points into design changes.",
   [T["chatgpt"]],
   [("OSF — pre-registration","https://osf.io/prereg/")],
   ["R3.2 slides"]),
@@ -346,7 +309,7 @@ RESEARCH = [
   "Decide where AI belongs in a multi-year agenda — and where it should not.",
   ["Build vs. buy vs. avoid for research infrastructure","Cost, reproducibility, and longevity of tools",
    "Ethics review and data governance for AI-in-research","Documenting an AI-use protocol for a lab"],
-  "Draft a one-page \u201cAI in this project\u201d protocol: tools, prompts, versions, validation, and disclosure.",
+  "Draft a one-page “AI in this project” protocol: tools, prompts, versions, validation, and disclosure.",
   [],
   [("Argyle et al. — Out of One, Many (Political Analysis)","https://www.cambridge.org/core/journals/political-analysis/article/out-of-one-many-using-language-models-to-simulate-human-samples/035D7C8A55B237942FB6DBAD7CAA4E49")],
   ["R3.3 slides"]),
@@ -360,7 +323,7 @@ RESEARCH = [
   ["R4.1 slides","R4.1 video","R4.1 notebook"]),
  ("R4.2","Silicon samples and synthetic respondents",
   "Critically explore using LLMs to simulate human samples for early-stage and pilot research.",
-  ["\u201cSilicon sampling\u201d: conditioning models on personas to mimic populations","Where it is useful (piloting, pretesting) and where it misleads",
+  ["“Silicon sampling”: conditioning models on personas to mimic populations","Where it is useful (piloting, pretesting) and where it misleads",
    "Validity, coverage, and bias of synthetic respondents","Ethical and reporting standards"],
   "Adapt the LLM-for-Social-Science synthetic-sampling notebook to generate synthetic survey responses, then compare distributions to a real benchmark.",
   [T["llmsocsci"],T["colab"]],
@@ -474,7 +437,7 @@ MANAGEMENT = [
   [("Anthropic — Building Effective Agents","https://www.anthropic.com/engineering/building-effective-agents")],
   ["M4.1 slides","M4.1 video"]),
  ("M4.2","Multi-agent systems and orchestration",
-  "Show how a \u201ccommittee\u201d of specialised agents can run a workflow, and the failure modes to manage.",
+  "Show how a “committee” of specialised agents can run a workflow, and the failure modes to manage.",
   ["Generic (proxy) vs. specialist agents","Centralized, decentralized, hierarchical patterns",
    "Agent-to-Agent communication and failure modes","Roles, recovery, and accountability"],
   "Design a multi-agent committee for a real workflow (e.g., loan review): name each agent, its tools, and its checks.",
@@ -521,22 +484,18 @@ TRACKS = {
  "management": ("Management", MANAGEMENT, "management/index.html"),
 }
 
-def slug(code):  # F2.1 -> f2-1
-    return code.lower().replace(".","-")
-
-for tkey,(tname,lessons,turl) in TRACKS.items():
+for tkey, (tname, lessons, turl) in TRACKS.items():
     rel = "../"
-    siblings = [(c, t, f"{slug(c)}.html") for c,t,*_ in lessons]
-    for i,(code,title,obj,concepts,handson,tools,reads,refs) in enumerate(lessons):
-        prev_l = (lessons[i-1][0], f"{slug(lessons[i-1][0])}.html") if i>0 else None
-        next_l = (lessons[i+1][0], f"{slug(lessons[i+1][0])}.html") if i<len(lessons)-1 else None
-        # module siblings only (same module prefix e.g. F2)
+    siblings = [(c, t, f"{slug(c)}.html") for c, t, *_ in lessons]
+    for i, (code, title, obj, concepts, handson, tools, reads, refs) in enumerate(lessons):
+        prev_l = (lessons[i-1][0], f"{slug(lessons[i-1][0])}.html") if i > 0 else None
+        next_l = (lessons[i+1][0], f"{slug(lessons[i+1][0])}.html") if i < len(lessons)-1 else None
         modpref = code.split(".")[0]
-        mod_sib = [(c,t,u) for c,t,u in siblings if c.split(".")[0]==modpref]
+        mod_sib = [(c, t, u) for c, t, u in siblings if c.split(".")[0] == modpref]
         page = lesson_page(rel, rel+turl, tname, code, title, obj, concepts, handson,
                            tools, reads, refs, prev_l, next_l, mod_sib)
         path = os.path.join(ROOT, tkey, f"{slug(code)}.html")
-        with open(path,"w") as f: f.write(page)
+        with open(path, "w", encoding="utf-8") as f: f.write(page)
         print("wrote", path)
 
 print("DONE")
