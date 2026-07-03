@@ -1,55 +1,30 @@
 #!/usr/bin/env python3
+"""Generate SPJIMR course outline pages in courses/."""
 import os, html
-ROOT=os.path.dirname(os.path.abspath(__file__))
+from _common import masthead, footer, page_shell
 
-def masthead():
-    items=[("Foundation","../foundation/index.html"),("Research","../research/index.html"),
-           ("Management","../management/index.html"),("All courses","index.html"),
-           ("Toolkit","../toolkit.html"),("Library","../library.html"),("About","../about.html")]
-    links="\n      ".join(f'<a href="{u}">{t}</a>' for t,u in items)
-    return f'''<header class="masthead">
-  <div class="wrap">
-    <a class="brand" href="../index.html"><span class="glyph">AI</span><span class="bt"><b>AI for Management &amp; Research</b><span>Open Learning · SPJIMR</span></span></a>
-    <button class="menubtn" aria-label="Menu">☰</button>
-    <nav class="nav" aria-label="Primary">
-      {links}
-      <a class="cta" href="../foundation/index.html">Start free →</a>
-    </nav>
-  </div>
-</header>'''
+ROOT = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+REL = "../"
 
-def footer():
-    return '''<footer class="foot">
-  <div class="wrap">
-    <div class="cols">
-      <div><h5>AI for Management &amp; Research</h5><p class="blurb">A free, public, hands-on curriculum teaching AI from a management and research perspective.</p></div>
-      <div><h5>Tracks</h5><a href="../foundation/index.html">AI Foundation</a><a href="../research/index.html">AI for Research</a><a href="../management/index.html">AI for Managers</a></div>
-      <div><h5>Resources</h5><a href="../toolkit.html">Free Tools Directory</a><a href="../library.html">Reading Library</a><a href="index.html">All courses</a></div>
-      <div><h5>About</h5><a href="../about.html">The instructor</a><a href="https://www.spjimr.org/faculty/abhishek-kumar-jha/">SPJIMR profile ↗</a></div>
-    </div>
-    <div class="base"><span>© 2026 · Prof. Abhishek Kumar Jha · SPJIMR Information Management</span><span>Open learning · Free to use</span></div>
-  </div>
-</footer>'''
-
-def course_page(fname,badge,title,subtitle,desc_paras,clos,pedagogy,sessions,refs):
-    clo_html="".join(f"<li>{html.escape(c)}</li>" for c in clos)
-    ped_html="".join(f"<li>{html.escape(p)}</li>" for p in pedagogy)
-    desc_html="".join(f"<p>{html.escape(p)}</p>" for p in desc_paras)
-    sched=""
+def course_page(fname, badge, title, subtitle, desc_paras, clos, pedagogy, sessions, refs):
+    clo_html = "".join(f"<li>{html.escape(c)}</li>" for c in clos)
+    ped_html = "".join(f"<li>{html.escape(p)}</li>" for p in pedagogy)
+    desc_html = "".join(f"<p>{html.escape(p)}</p>" for p in desc_paras)
+    sched = ""
     if sessions:
-        rows=""
-        for num,t,detail,ref in sessions:
-            refc=f'<a class="ref" href="#" onclick="return false" title="To be linked">ref: {html.escape(ref)}</a>' if ref else ""
-            rows+=f'''<tr><td class="num">{html.escape(num)}</td><td class="ttl">{html.escape(t)}<div style="font-weight:400;color:var(--slate);font-size:13.5px;margin-top:5px">{html.escape(detail)}</div></td><td>{refc}</td></tr>'''
-        sched=f'''<div class="block"><p class="blabel">Session plan</p>
+        rows = ""
+        for num, t, detail, ref in sessions:
+            refc = f'<a class="ref" href="#" onclick="return false" title="To be linked">ref: {html.escape(ref)}</a>' if ref else ""
+            rows += f'''<tr><td class="num">{html.escape(num)}</td><td class="ttl">{html.escape(t)}<div style="font-weight:400;color:var(--slate);font-size:13.5px;margin-top:5px">{html.escape(detail)}</div></td><td>{refc}</td></tr>'''
+        sched = f'''<div class="block"><p class="blabel">Session plan</p>
         <div class="tablewrap"><table class="schedule">
           <thead><tr><th style="width:70px">#</th><th>Session</th><th style="width:120px">Materials</th></tr></thead>
           <tbody>{rows}</tbody>
         </table></div></div>'''
-    refnote=""
+    refnote = ""
     if refs:
-        refnote=f'<div class="lead-note"><b>Note.</b> {html.escape(refs)}</div>'
-    body=f'''<div class="lessonhead">
+        refnote = f'<div class="lead-note"><b>Note.</b> {html.escape(refs)}</div>'
+    body = f'''<div class="lessonhead">
   <div class="wrap">
     <p class="crumb"><a href="index.html">All courses</a> · SPJIMR</p>
     <h1>{html.escape(title)}</h1>
@@ -81,49 +56,31 @@ def course_page(fname,badge,title,subtitle,desc_paras,clos,pedagogy,sessions,ref
     </div>
   </div>
 </section>'''
-    full=f'''<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{html.escape(title)} — SPJIMR course</title>
-<meta name="description" content="{html.escape(subtitle)}">
-<link rel="stylesheet" href="../assets/style.css">
-</head>
-<body>
-<a class="skip" href="#main">Skip to content</a>
-{masthead()}
-<main id="main">
-{body}
-</main>
-{footer()}
-<script src="../assets/main.js"></script>
-</body>
-</html>'''
-    with open(os.path.join(ROOT,fname),"w") as f: f.write(full)
-    print("wrote",fname)
+    full = page_shell(REL, f"{title} — SPJIMR course", subtitle, body)
+    with open(os.path.join(ROOT, "courses", fname), "w", encoding="utf-8") as f: f.write(full)
+    print("wrote", fname)
 
 # ---------- AAI Foundation (PGPM) — full 18-session schedule ----------
-aai_sessions=[
- ("1","Intelligent Systems: What AI Actually Is","Rule-based to GenAI · live AI vs. marketing hype · mapping the AI landscape. Term paper & project roll-out.",""),
- ("2","The AI Revolution So Far","Global & Indian models · promised vs. actual delivery · adoption implications for Indian firms.",""),
- ("3","What Comes Next: Scaling AI Up, Down, Sideways","Models vs. workflow vs. agents · hands-on human-AI interface · predicting 3-year enterprise maturity.",""),
- ("4","Data Before Models","Four data dimensions · diagnosing client data posture · lessons from business caselets.",""),
- ("5","Predicting Outcomes at Scale","Decision design · precision/recall in business terms · managing false positive/negative costs.",""),
- ("6","Discovering Hidden Segments","Uncovering 'Bharat' micro-segments · Elbow/Silhouette as business confidence · data-driven product & pricing.",""),
- ("7","Reading What Customers Buy Together","Co-purchase & association rule mining · actionable patterns vs. data noise.",""),
- ("8","Listening to Millions","Sentiment/topic modelling · classical NLP vs. LLM cost & complexity.",""),
- ("9","Mid-Course Check-In","Critiquing mid-term proposals · sharpening problem statements. Mid review (10%).",""),
- ("10","AI Without Guardrails","Algorithmic bias & liability framework · Responsible AI. Pre-read: Mercor case study.","Mercor case"),
- ("11","How AI Understands Meaning","Semantic search · vector DBs and RAG architecture · multimodal search. Quiz (15%).",""),
- ("12","Reasoning AI and Deliberate Thinking","System 1 vs. System 2 in AI · latency vs. reasoning depth · human-oversight checkpoints.",""),
- ("13","Memory in AI Systems","Episodic, semantic, procedural · chunking & context-window management · specifying memory for client needs.",""),
- ("14","Introduction to AI Agents","Reasoning-Action-Reflection loops · human-in-the-loop governance · escalation triggers & audit trails.",""),
- ("15","Multi-Agent Systems","Centralized, decentralized, hierarchical patterns · A2A communication & failure modes. Term project (30%).",""),
- ("16","Implementing AI in Organisations","Applying ADKAR to overcome middle-management resistance · 90-day post-deployment monitoring.",""),
- ("17–18","Final Project Presentations & Synthesis","Critiquing peer proposals on rigor & ethics · presenting a consulting-ready plan covering data, governance, ROI.",""),
+aai_sessions = [
+ ("1", "Intelligent Systems: What AI Actually Is", "Rule-based to GenAI · live AI vs. marketing hype · mapping the AI landscape. Term paper & project roll-out.", ""),
+ ("2", "The AI Revolution So Far", "Global & Indian models · promised vs. actual delivery · adoption implications for Indian firms.", ""),
+ ("3", "What Comes Next: Scaling AI Up, Down, Sideways", "Models vs. workflow vs. agents · hands-on human-AI interface · predicting 3-year enterprise maturity.", ""),
+ ("4", "Data Before Models", "Four data dimensions · diagnosing client data posture · lessons from business caselets.", ""),
+ ("5", "Predicting Outcomes at Scale", "Decision design · precision/recall in business terms · managing false positive/negative costs.", ""),
+ ("6", "Discovering Hidden Segments", "Uncovering 'Bharat' micro-segments · Elbow/Silhouette as business confidence · data-driven product & pricing.", ""),
+ ("7", "Reading What Customers Buy Together", "Co-purchase & association rule mining · actionable patterns vs. data noise.", ""),
+ ("8", "Listening to Millions", "Sentiment/topic modelling · classical NLP vs. LLM cost & complexity.", ""),
+ ("9", "Mid-Course Check-In", "Critiquing mid-term proposals · sharpening problem statements. Mid review (10%).", ""),
+ ("10", "AI Without Guardrails", "Algorithmic bias & liability framework · Responsible AI. Pre-read: Mercor case study.", "Mercor case"),
+ ("11", "How AI Understands Meaning", "Semantic search · vector DBs and RAG architecture · multimodal search. Quiz (15%).", ""),
+ ("12", "Reasoning AI and Deliberate Thinking", "System 1 vs. System 2 in AI · latency vs. reasoning depth · human-oversight checkpoints.", ""),
+ ("13", "Memory in AI Systems", "Episodic, semantic, procedural · chunking & context-window management · specifying memory for client needs.", ""),
+ ("14", "Introduction to AI Agents", "Reasoning-Action-Reflection loops · human-in-the-loop governance · escalation triggers & audit trails.", ""),
+ ("15", "Multi-Agent Systems", "Centralized, decentralized, hierarchical patterns · A2A communication & failure modes. Term project (30%).", ""),
+ ("16", "Implementing AI in Organisations", "Applying ADKAR to overcome middle-management resistance · 90-day post-deployment monitoring.", ""),
+ ("17–18", "Final Project Presentations & Synthesis", "Critiquing peer proposals on rigor & ethics · presenting a consulting-ready plan covering data, governance, ROI.", ""),
 ]
-course_page("aai-foundation.html","PGPM · 2 credits","AI & Analytics Foundation",
+course_page("aai-foundation.html", "PGPM · 2 credits", "AI & Analytics Foundation",
   "PGPM · Co-taught with Prof. Deep Prakash · 18 sessions · 2 credits",
   ["In an era where every business function is being reshaped by AI, the ability to understand, evaluate, and implement AI solutions is the defining competency of the next generation of management leaders. This course is a foundational pillar for future leaders stepping into implementation and transformation-consulting roles, where the gap between a technically sound proposal and successful organisational adoption can cost crores and careers.",
    "It does not treat AI as a subject for data scientists alone. Instead, it builds the strategic and applied literacy a consultant, business leader, or transformation manager needs: to diagnose AI opportunities, evaluate vendor claims, manage implementation risk, and drive adoption across complex organisations — from why projects fail on data quality, to ethical governance, to agentic architectures, all grounded in Indian and global contexts."],
@@ -137,17 +94,17 @@ course_page("aai-foundation.html","PGPM · 2 credits","AI & Analytics Foundation
   "Evaluation: Quiz 15% · Class participation 10% · Individual term project 35% · Mid-review 10% · Final project & viva 30%.")
 
 # ---------- LLM Research Workshop — 8 sessions ----------
-llm_sessions=[
- ("1","LLMs for Management Research","What LLMs are (next-token prediction, transformers, scale) · five research roles · capability benchmarks · course tools (HuggingFace, Colab, GPT-4 API).","S1 slides"),
- ("2","Embeddings & Semantic Similarity","From bag-of-words to sentence embeddings · cosine similarity as construct measurement · UMAP for research mapping · embedding 200 abstracts.","S2 notebook"),
- ("3","Data Collection: Web, APIs & Documents","Web scraping · social media APIs · SEC EDGAR extraction · handling long documents · coreference resolution.","S3 notebook"),
- ("4","Data Creation I: Synthetic Respondents","LLMs as survey participants · persona design · few-shot & RAG · coding open-ended responses · governance.","S4 notebook"),
- ("5","Data Creation II: Experiments & Evaluators","LLM as stimulus generator & evaluator · DICE paradigm · detecting AI-generated responses in panels.","S5 notebook"),
- ("6","Data Analysis I: Classification & Measurement","Zero-shot / few-shot / fine-tuning · GPT vs. fine-tuned BERT · synthetic-expert pipeline · Cohen's kappa, ICC.","S6 notebook"),
- ("7","Data Analysis II: Qualitative at Scale","Inductive pipeline: text→embed→cluster→label→propositions · explainable ML · epistemic risks.","S7 notebook"),
- ("8","Meta-Research: Reviews, Theory & Ethics","Computational literature review · the Janus effect · model collapse · methodological pluralism · project pitches.","S8 slides"),
+llm_sessions = [
+ ("1", "LLMs for Management Research", "What LLMs are (next-token prediction, transformers, scale) · five research roles · capability benchmarks · course tools (HuggingFace, Colab, GPT-4 API).", "S1 slides"),
+ ("2", "Embeddings & Semantic Similarity", "From bag-of-words to sentence embeddings · cosine similarity as construct measurement · UMAP for research mapping · embedding 200 abstracts.", "S2 notebook"),
+ ("3", "Data Collection: Web, APIs & Documents", "Web scraping · social media APIs · SEC EDGAR extraction · handling long documents · coreference resolution.", "S3 notebook"),
+ ("4", "Data Creation I: Synthetic Respondents", "LLMs as survey participants · persona design · few-shot & RAG · coding open-ended responses · governance.", "S4 notebook"),
+ ("5", "Data Creation II: Experiments & Evaluators", "LLM as stimulus generator & evaluator · DICE paradigm · detecting AI-generated responses in panels.", "S5 notebook"),
+ ("6", "Data Analysis I: Classification & Measurement", "Zero-shot / few-shot / fine-tuning · GPT vs. fine-tuned BERT · synthetic-expert pipeline · Cohen's kappa, ICC.", "S6 notebook"),
+ ("7", "Data Analysis II: Qualitative at Scale", "Inductive pipeline: text→embed→cluster→label→propositions · explainable ML · epistemic risks.", "S7 notebook"),
+ ("8", "Meta-Research: Reviews, Theory & Ethics", "Computational literature review · the Janus effect · model collapse · methodological pluralism · project pitches.", "S8 slides"),
 ]
-course_page("llm-research-workshop.html","Doctoral · Research","Using LLMs for Management Research",
+course_page("llm-research-workshop.html", "Doctoral · Research", "Using LLMs for Management Research",
   "Workshop · Prompt-first, Colab-based · Google Colab + HuggingFace · 8 sessions",
   ["A hands-on, prompt-first workshop on using large language models as instruments of management research. Built on the Google Colab and HuggingFace ecosystem, it moves through five research roles — collect, create, code, analyse, and theorize — and ends with project pitches.",
    "Every session pairs a methodological idea with a runnable notebook: embedding abstracts and clustering them, scraping and cleaning corporate filings, generating and validating synthetic respondents, computing inter-rater reliability against gold labels, and running a mini computational literature review."],
@@ -161,7 +118,7 @@ course_page("llm-research-workshop.html","Doctoral · Research","Using LLMs for 
   "Anchored in recent methods readings across Organizational Research Methods, the Journal of Marketing, Marketing Science, and related venues.")
 
 # ---------- Agentic AI ----------
-course_page("agentic-ai.html","PGDM · Elective","Agentic AI",
+course_page("agentic-ai.html", "PGDM · Elective", "Agentic AI",
   "PGDM · Concept-driven instruction + guided labs · capstone with live evaluation",
   ["A comprehensive, practice-oriented introduction to Agentic AI systems — moving beyond standalone LLMs toward autonomous, tool-using, memory-enabled agents. It covers the conceptual foundations of reasoning LLMs, test-time compute scaling, and memory architectures, alongside practical techniques such as Retrieval-Augmented Generation (RAG), tool integration, and multi-agent coordination.",
    "Learners explore how agents plan, reason, and act in complex environments by combining short- and long-term memory, external tools, and structured orchestration. The course culminates in a hands-on capstone where participants design and deploy a multi-agent 'committee' system that solves a realistic, domain-specific problem under evaluation conditions."],
@@ -177,7 +134,7 @@ course_page("agentic-ai.html","PGDM · Elective","Agentic AI",
   "Readings made available on Wisenet. A surprise quiz may be conducted at any time, with weightages adjusted accordingly.")
 
 # ---------- Maker Lab ----------
-course_page("maker-lab.html","PGDM · Maker Lab","AI Maker Lab",
+course_page("maker-lab.html", "PGDM · Maker Lab", "AI Maker Lab",
   "PGDM · Discussions, tech demos, in-class group work & mini-experiments",
   ["The course enables students to structure messy managerial problems into AI-solvable tasks using large language models such as Gemini, with a focus on clear inputs, logic, and outputs. Students learn to design low-code interfaces and connect them to institutional or synthetic data (Sheets, Firebase, document repositories) to create AI-enabled business applications.",
    "It introduces Retrieval-Augmented Generation (RAG) and workflow automation (e.g., via tools like n8n) as levers to augment decision-making and redesign processes. Emphasis is placed on responsible, human-in-the-loop AI — using synthetic data, personas, and light digital twins to explore risk, governance, and accountability."],
@@ -192,7 +149,7 @@ course_page("maker-lab.html","PGDM · Maker Lab","AI Maker Lab",
   "No prescribed textbook. Readings shared in the course handout.")
 
 # ---------- GenAI for Business ----------
-course_page("genai-business.html","Executive / PGPM","Generative AI for Business",
+course_page("genai-business.html", "Executive / PGPM", "Generative AI for Business",
   "Executive / PGPM · Applied, tool-supported · 17 interactive learning tools",
   ["An applied tour of generative AI for business decisions, supported by a purpose-built set of 17 interactive 'prepared playground' learning tools. Each tool is fully scaffolded so learners interact only with the parts that teach the concept — hallucination, prompting patterns, embeddings, RAG, and agents — across three delivery formats: static HTML/JS, Google Colab notebooks, and Hugging Face Spaces.",
    "The course pairs concept sessions with these hands-on tools so that managers can build intuition by doing, using free-tier models and their own API keys where needed."],
@@ -206,7 +163,7 @@ course_page("genai-business.html","Executive / PGPM","Generative AI for Business
   "Supported by a developer specification booklet covering 17 interactive tools across three delivery formats (static HTML/JS, Colab, Hugging Face Spaces).")
 
 # ---------- Theory & Theorizing ----------
-course_page("theory-theorizing.html","Doctoral","Theory & Theorizing",
+course_page("theory-theorizing.html", "Doctoral", "Theory & Theorizing",
   "Doctoral seminar · The conceptual companion to computational method",
   ["A doctoral seminar on what theory is and how it is built. Where the computational courses in this portfolio teach AI as method, this seminar develops the craft of theorizing itself — constructs, mechanisms, boundary conditions, and the moves by which scholars turn observation into explanation.",
    "It serves as the conceptual companion to the LLM research workshop: the same questions of validity and contribution, approached from the side of theory rather than tooling."],
